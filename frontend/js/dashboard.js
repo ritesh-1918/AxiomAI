@@ -55,13 +55,12 @@ async function routePrompt() {
 
     try {
         const start = Date.now();
-        const res = await fetch(`${API_URL}/v1/route`, {
+        const response = await fetch(`${API_URL}/api/v1/route`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt })
         });
 
-        if (!res.ok) throw new Error('API Error');
         const data = await res.json();
 
         addSystemLog(`Routed to ${data.selected_tier} (${data.latency_ms}ms)`, 'success');

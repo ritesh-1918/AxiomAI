@@ -131,7 +131,7 @@ async function analyzePrompt(text) {
     resultEl.style.display = 'none';
 
     try {
-        const response = await fetch(`${API_URL}/v1/route`, {
+        const response = await fetch(`${API_URL}/api/v1/route`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: text })

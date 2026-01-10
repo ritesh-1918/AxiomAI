@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Login - AxiomAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: rgba(13, 17, 23, 0.9);
+            --accent-primary: #00d4ff;
+            --accent-secondary: #1fb6d4;
+            --accent-glow: rgba(0, 212, 255, 0.3);
+            --accent-subtle: rgba(0, 212, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --text-muted: #6b7280;
+            --border-color: rgba(0, 212, 255, 0.2);
+            --gradient-accent: linear-gradient(135deg, #00d4ff 0%, #1fb6d4 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0a1628 0%, #0d1117 50%, #0a0e1a 100%);
+            z-index: -2;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+            z-index: -1;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 48px 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-text {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .auth-title {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .auth-title p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            letter-spacing: 2px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-subtle);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: var(--gradient-accent);
+            color: var(--bg-primary);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 24px;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-primary);
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+        }
+
+        .step-2 {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="auth-container">
+        <a href="login.html" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to Login
+        </a>
+
+        <div class="auth-card">
+            <div class="auth-logo">
+                <span class="logo-text">AxiomAI</span>
+            </div>
+
+            <div class="auth-title">
+                <h1>Verify OTP</h1>
+                <p id="subtitle">Enter your email to receive a code</p>
+            </div>
+
+            <div id="message" class="message"></div>
+
+            <!-- Step 1: Email -->
+            <form id="emailForm" onsubmit="sendOtp(event)">
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" placeholder="you@example.com"
+                        style="text-align: left; letter-spacing: normal;" required>
+                </div>
+                <button type="submit" class="btn" id="sendBtn">Send Code</button>
+            </form>
+
+            <!-- Step 2: Code -->
+            <form id="codeForm" class="step-2" onsubmit="verifyOtp(event)">
+                <div class="form-group">
+                    <label for="token">Enter 6-Digit Code</label>
+                    <input type="text" id="token" placeholder="123456" maxlength="6" pattern="[0-9]*" required>
+                </div>
+                <button type="submit" class="btn" id="verifyBtn">Verify & Login</button>
+                <div style="text-align: center; margin-top: 16px;">
+                    <a href="#" onclick="location.reload()"
+                        style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none;">Wrong email?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let userEmail = '';
+
+        async function sendOtp(e) {
+            e.preventDefault();
+            userEmail = document.getElementById('email').value;
+            const btn = document.getElementById('sendBtn');
+            const msg = document.getElementById('message');
+
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            msg.style.display = 'none';
+
+            try {
+                const { error } = await supabaseClient.auth.signInWithOtp({
+                    email: userEmail,
+                    options: { shouldCreateUser: false } // Only execute if user exists? Or allow signup? Default is allow.
+                });
+
+                if (error) throw error;
+
+                // Switch to Step 2
+                document.getElementById('emailForm').style.display = 'none';
+                document.getElementById('codeForm').style.display = 'block';
+                document.getElementById('subtitle').textContent = `Code sent to ${userEmail}`;
+                document.getElementById('token').focus();
+
+                msg.textContent = 'Code sent!';
+                msg.className = 'message success';
+                msg.style.display = 'block';
+            } catch (error) {
+                msg.textContent = error.message;
+                msg.className = 'message error';
+                msg.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Send Code';
+            }
+        }
+
+        async function verifyOtp(e) {
+            e.preventDefault();
+            const token = document.getElementById('token').value;
+            const btn = document.getElementById('verifyBtn');
+            const msg = document.getElementById('message');
+
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+            msg.style.display = 'none';
+
+            try {
+                const { data, error } = await supabaseClient.auth.verifyOtp({
+                    email: userEmail,
+                    token: token,
+                    type: 'email'
+                });
+
+                if (error) throw error;
+
+                msg.textContent = 'Verified! Redirecting...';
+                msg.className = 'message success';
+                msg.style.display = 'block';
+
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            } catch (error) {
+                msg.textContent = 'Invalid code. Please try again.';
+                msg.className = 'message error';
+                msg.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Verify & Login';
+            }
+        }
+    </script>
+</body>
+
+</html>
