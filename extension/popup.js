@@ -1,57 +1,101 @@
-// HuggingFace Space Gradio API
-const API_URL = 'https://ritesh1918-axiom-router.hf.space/call/classify_prompt';
+// AxiomAI Extension Popup Logic
 
-document.getElementById('analyzeBtn').addEventListener('click', async () => {
-    const prompt = document.getElementById('prompt').value;
-    if (!prompt.trim()) return;
+const STORAGE_KEY = 'axiom_settings';
+const DEFAULT_SETTINGS = {
+    enabled: true,
+    mode: 'balanced'
+};
 
-    const btn = document.getElementById('analyzeBtn');
-    btn.textContent = '⏳ Analyzing...';
-    btn.disabled = true;
+// Elements
+const toggle = document.getElementById('extensionToggle');
+const modeSelect = document.getElementById('routingMode');
+const applyBtn = document.getElementById('applyBtn');
+const statusText = document.querySelector('.status-text');
+
+// Load settings
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const result = await chrome.storage.local.get([STORAGE_KEY]);
+        const settings = result[STORAGE_KEY] || DEFAULT_SETTINGS;
+
+        toggle.checked = settings.enabled;
+        modeSelect.value = settings.mode;
+        updateStatus(settings.enabled);
+
+    } catch (e) {
+        console.error('Failed to load settings', e);
+    }
+});
+
+// Save settings handler
+applyBtn.addEventListener('click', async () => {
+    const settings = {
+        enabled: toggle.checked,
+        mode: modeSelect.value
+    };
+
+    // UI Feedback
+    const originalText = applyBtn.textContent;
+    applyBtn.textContent = 'Saving...';
+    applyBtn.style.opacity = '0.7';
 
     try {
-        // Gradio API format
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: [prompt] })
-        });
+        await chrome.storage.local.set({ [STORAGE_KEY]: settings });
 
-        if (!response.ok) throw new Error('API Error');
-        const result = await response.json();
-
-        // Get the event_id and fetch result
-        const eventId = result.event_id;
-        const resultResponse = await fetch(`https://ritesh1918-axiom-router.hf.space/call/classify_prompt/${eventId}`);
-        const resultText = await resultResponse.text();
-
-        // Parse SSE response
-        const lines = resultText.split('\n');
-        const dataLine = lines.find(l => l.startsWith('data:'));
-        if (dataLine) {
-            const data = JSON.parse(dataLine.replace('data: ', ''));
-            const routingResult = data[0];
-
-            document.getElementById('result').classList.add('visible');
-            const tierEl = document.getElementById('tier');
-            const tier = routingResult['Recommended Tier'];
-            tierEl.textContent = tier;
-            tierEl.className = 'tier ' + (tier.includes('LARGE') ? 'large' : 'small');
-            document.getElementById('confidence').textContent = routingResult['Confidence'];
-            document.getElementById('latency').textContent = '-';
+        // Notify content script
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                type: 'AXIOM_SETTINGS_UPDATED',
+                settings: settings
+            });
         }
-    } catch (error) {
-        console.error(error);
-        // Demo fallback
-        document.getElementById('result').classList.add('visible');
-        const isLarge = prompt.length > 50;
-        const tierEl = document.getElementById('tier');
-        tierEl.textContent = isLarge ? '🔥 LARGE LLM' : '⚡ SMALL LLM';
-        tierEl.className = 'tier ' + (isLarge ? 'large' : 'small');
-        document.getElementById('confidence').textContent = (85 + Math.random() * 12).toFixed(1) + '%';
-        document.getElementById('latency').textContent = (30 + Math.random() * 20).toFixed(0) + 'ms';
-    }
 
-    btn.textContent = '🚀 Analyze Prompt';
-    btn.disabled = false;
+        // Success state
+        setTimeout(() => {
+            applyBtn.textContent = 'Settings Saved!';
+            applyBtn.style.background = '#10b981'; // Green
+            applyBtn.style.opacity = '1';
+
+            updateStatus(settings.enabled);
+
+            setTimeout(() => {
+                applyBtn.textContent = originalText;
+                applyBtn.style.background = ''; // Reset to CSS gradient
+            }, 1500);
+        }, 500);
+
+    } catch (e) {
+        console.error('Failed to save', e);
+        applyBtn.textContent = 'Error Saving';
+    }
+});
+
+function updateStatus(enabled) {
+    if (enabled) {
+        statusText.textContent = `Active • ${getModeLabel(modeSelect.value)}`;
+        statusText.style.color = '#059669'; // Greenish
+    } else {
+        statusText.textContent = 'Extension is inactive';
+        statusText.style.color = '#94a3b8'; // Gray
+    }
+}
+
+function getModeLabel(value) {
+    const labels = {
+        'cost_optimized': 'Cost Saving Mode',
+        'balanced': 'Balanced Routing',
+        'performance': 'Max Performance',
+        'manual': 'Manual Approval'
+    };
+    return labels[value] || 'Ready';
+}
+
+// Toggle listener for immediate visual updates
+toggle.addEventListener('change', () => {
+    updateStatus(toggle.checked);
+});
+
+modeSelect.addEventListener('change', () => {
+    updateStatus(toggle.checked);
 });
