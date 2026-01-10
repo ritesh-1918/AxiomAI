@@ -178,6 +178,21 @@ function updateUI(result) {
     document.getElementById('axiom-explanation').textContent = result['Explanation'] || '';
 }
 
+// Listen for settings updates
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === 'AXIOM_SETTINGS_UPDATED') {
+        // Apply settings if needed (e.g., update thresholds or toggle widget)
+        console.log('Axiom Settings Updated:', request.settings);
+        if (request.settings.enabled === false) {
+            const widget = document.getElementById('axiom-widget');
+            if (widget) widget.style.display = 'none';
+        } else {
+            const widget = document.getElementById('axiom-widget');
+            if (widget) widget.style.display = 'block';
+        }
+    }
+});
+
 // Initialize
 createWidget();
 console.log('AxiomAI Router loaded on', window.location.hostname);

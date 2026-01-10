@@ -45,10 +45,15 @@ applyBtn.addEventListener('click', async () => {
         // Notify content script
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tabs[0]) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                type: 'AXIOM_SETTINGS_UPDATED',
-                settings: settings
-            });
+            try {
+                await chrome.tabs.sendMessage(tabs[0].id, {
+                    type: 'AXIOM_SETTINGS_UPDATED',
+                    settings: settings
+                });
+            } catch (err) {
+                // Ignore connection errors (content script might not be on this page)
+                console.log('Content script not available on this tab');
+            }
         }
 
         // Success state
