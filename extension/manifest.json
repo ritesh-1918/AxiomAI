@@ -8,7 +8,7 @@
         "storage"
     ],
     "host_permissions": [
-        "https://ritesh1918-axiom-router.hf.space/*"
+        "https://ritesh1918-axiom-backend.hf.space/*"
     ],
     "action": {
         "default_popup": "popup.html",

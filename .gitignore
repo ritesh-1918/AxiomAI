@@ -10,6 +10,7 @@ __pycache__/
 # Model files (too large for git)
 saved_model/
 *.safetensors
+backend/ml/models/
 
 # Upload scripts with tokens (NEVER COMMIT)
 upload_*.py
@@ -28,11 +29,7 @@ Thumbs.db
 # Node
 node_modules/
 
-# ===================================
-# Backend (deployed on HuggingFace Spaces - NOT in GitHub)
-# ===================================
-backend/
-ml_training/
+
 hf_space/
 Dockerfile
 .dockerignore
@@ -41,3 +38,12 @@ requirements.txt
 .env
 .env.local
 
+
+backend/
+ml_training/
+
+backend/
+ml_training/
+
+backend/
+ml_training/

@@ -61,7 +61,11 @@ async function routePrompt() {
             body: JSON.stringify({ prompt })
         });
 
-        const data = await res.json();
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`API Error ${response.status}: ${errText}`);
+        }
+        const data = await response.json();
 
         addSystemLog(`Routed to ${data.selected_tier} (${data.latency_ms}ms)`, 'success');
 
@@ -79,8 +83,10 @@ async function routePrompt() {
 
         displayResult(data);
     } catch (e) {
-        console.error(e);
-        addSystemLog('API connection failed. Switching to demo mode.', 'warning');
+        // Fallback to Demo Mode
+        console.error('API Error, using fallback:', e);
+        addSystemLog(`Connection Failed: ${e.message}`, 'error');
+        addSystemLog('Switching to demo mode.', 'warning');
         // Fallback demo result if API is offline
         displayResult({
             selected_tier: prompt.length > 50 ? 'large_llm' : 'small_llm',

@@ -150,12 +150,22 @@ async function analyzePrompt(text) {
     } catch (error) {
         console.error('AxiomAI:', error);
         // Fallback
-        const isLarge = text.length > 150;
+        // Fallback Heuristic
+        const complexityKeywords = [
+            'code', 'function', 'class', 'python', 'javascript', 'react', 'sql',
+            'explain', 'describe', 'difference', 'compare', 'analysis',
+            'quantum', 'physics', 'history', 'essay', 'poem', 'generate'
+        ];
+        const hasKeyword = complexityKeywords.some(kw => text.toLowerCase().includes(kw));
+        const isLong = text.length > 100;
+
+        const isComplex = hasKeyword || isLong;
+
         updateUI({
-            'Recommended Tier': isLarge ? '🔥 LARGE LLM' : '⚡ SMALL LLM',
+            'Recommended Tier': isComplex ? '🔥 LARGE LLM' : '⚡ SMALL LLM',
             'Confidence': 'Note: Offline Mode',
             'Method': 'Local Rule',
-            'Explanation': 'Backend unreachable'
+            'Explanation': isComplex ? 'Detected complex keywords/length' : 'Simple query detected (Offline)'
         });
     } finally {
         btn.disabled = false;
