@@ -4,487 +4,503 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AxiomAI - Intelligent LLM Routing</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <title>AxiomAI - Intelligent LLM Router | Optimize AI Costs</title>
+    <meta name="description"
+        content="Smart AI routing that cuts costs by 70%. Route prompts to the right LLM tier automatically with ML-powered classification.">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        :root {
-            --primary: #8b5cf6;
-            --secondary: #06b6d4;
-            --accent: #f43f5e;
-            --bg: #030303;
-        }
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: #fff;
-            overflow-x: hidden;
-        }
-
-        /* Navbar */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(3, 3, 3, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
-            font-weight: 800;
-        }
-
-        .logo img {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: #fff;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.4);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at 20% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
-            filter: blur(60px);
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), transparent);
-            backdrop-filter: blur(2px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            animation: float 12s ease-in-out infinite;
-        }
-
-        .shape-1 {
-            width: 600px;
-            height: 140px;
-            left: -10%;
-            top: 20%;
-            transform: rotate(12deg);
-        }
-
-        .shape-2 {
-            width: 500px;
-            height: 120px;
-            right: -5%;
-            top: 75%;
-            transform: rotate(-15deg);
-            background: linear-gradient(135deg, rgba(244, 63, 94, 0.15), transparent);
-            animation-delay: -2s;
-        }
-
-        .shape-3 {
-            width: 300px;
-            height: 80px;
-            left: 10%;
-            bottom: 10%;
-            transform: rotate(-8deg);
-            animation-delay: -4s;
-        }
-
-        .shape-4 {
-            width: 200px;
-            height: 60px;
-            right: 20%;
-            top: 15%;
-            transform: rotate(20deg);
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), transparent);
-            animation-delay: -6s;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(15px);
-            }
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            max-width: 900px;
-            padding: 0 2rem;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 100px;
-            margin-bottom: 2rem;
-            animation: fadeUp 1s ease-out 0.3s both;
-        }
-
-        .badge-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent);
-        }
-
-        .badge span {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
-        }
-
-        h1 {
-            font-size: clamp(2.5rem, 8vw, 5rem);
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            animation: fadeUp 1s ease-out 0.5s both;
-        }
-
-        h1 .line1 {
-            background: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0.8));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        h1 .line2 {
-            background: linear-gradient(90deg, #a78bfa, #fff, #67e8f9);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-subtitle {
-            font-size: 1.25rem;
-            color: rgba(255, 255, 255, 0.4);
-            max-width: 600px;
-            margin: 0 auto 2.5rem;
-            line-height: 1.7;
-            animation: fadeUp 1s ease-out 0.7s both;
-        }
-
-        .hero-cta {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            animation: fadeUp 1s ease-out 0.9s both;
-        }
-
-        .hero-cta .btn {
-            padding: 1rem 2rem;
-            font-size: 1rem;
-        }
-
-        .stats {
-            display: flex;
-            gap: 3rem;
-            justify-content: center;
-            margin-top: 4rem;
-            animation: fadeUp 1s ease-out 1.1s both;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-label {
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.9rem;
-            margin-top: 0.25rem;
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .hero::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, var(--bg), transparent 30%, transparent 70%, rgba(3, 3, 3, 0.8));
-            pointer-events: none;
-        }
-
-        .features {
-            padding: 6rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .features h2 {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-
-        .feature-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 2rem;
-            transition: all 0.3s;
-        }
-
-        .feature-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .feature-card p {
-            color: rgba(255, 255, 255, 0.5);
-            line-height: 1.6;
-        }
-
-        .cta-section {
-            padding: 6rem 2rem;
-            text-align: center;
-            background: rgba(139, 92, 246, 0.05);
-            border-radius: 30px;
-            max-width: 1000px;
-            margin: 4rem auto;
-        }
-
-        .cta-section h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .cta-section p {
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 2rem;
-        }
-
-        footer {
-            text-align: center;
-            padding: 2rem;
-            color: rgba(255, 255, 255, 0.3);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .stats {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-
-            .shape {
-                display: none;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/landing.css">
+    <link rel="icon" href="favicon.png" type="image/png">
 </head>
 
 <body>
+    <!-- Background Elements -->
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    <div class="bg-watermark">AXIOM</div>
+    <div class="geometric-lines">
+        <svg viewBox="0 0 1920 1080" preserveAspectRatio="none">
+            <path d="M0,200 L400,100 L800,300 L1200,50 L1600,250 L1920,100" stroke="rgba(0,212,255,0.08)" fill="none"
+                stroke-width="1" />
+            <path d="M0,400 L300,350 L700,500 L1100,300 L1500,450 L1920,350" stroke="rgba(0,212,255,0.06)" fill="none"
+                stroke-width="1" />
+            <path d="M0,600 L500,550 L900,700 L1300,500 L1700,650 L1920,580" stroke="rgba(0,212,255,0.05)" fill="none"
+                stroke-width="1" />
+            <polygon points="100,100 200,50 250,150 150,180" stroke="rgba(0,212,255,0.1)" fill="none"
+                stroke-width="1" />
+            <polygon points="1600,200 1700,150 1750,250 1650,280" stroke="rgba(0,212,255,0.08)" fill="none"
+                stroke-width="1" />
+            <polygon points="800,400 900,350 950,450 850,480" stroke="rgba(0,212,255,0.06)" fill="none"
+                stroke-width="1" />
+        </svg>
+    </div>
+
+    <!-- Navigation -->
     <nav class="navbar">
-        <div class="logo">
-            <img src="assets/logo.png" alt="AxiomAI">
-            <span>AxiomAI</span>
-        </div>
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#demo">Demo</a>
-            <a href="login.html" class="btn btn-outline">Login</a>
-            <a href="login.html" class="btn btn-primary">Get Started</a>
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" fill="none">
+                        <path d="M20 5L35 15V25L20 35L5 25V15L20 5Z" stroke="currentColor" stroke-width="2"
+                            fill="none" />
+                        <path d="M20 12L28 17V23L20 28L12 23V17L20 12Z" fill="currentColor" opacity="0.3" />
+                        <circle cx="20" cy="20" r="4" fill="currentColor" />
+                    </svg>
+                </div>
+                <span class="logo-text">AxiomAI</span>
+            </a>
+
+            <div class="nav-links">
+                <div class="nav-item dropdown">
+                    <a href="#features">Features <span class="dropdown-arrow">▾</span></a>
+                    <div class="dropdown-menu">
+                        <a href="#smart-routing">Smart Routing</a>
+                        <a href="#ml-model">ML Classification</a>
+                        <a href="#analytics">Analytics</a>
+                    </div>
+                </div>
+                <a href="#how-it-works" class="nav-item">How it Works</a>
+                <a href="#pricing" class="nav-item">Pricing</a>
+                <a href="dashboard.html" class="nav-item">Dashboard</a>
+            </div>
+
+            <div class="nav-actions">
+                <a href="login.html" class="btn-ghost">Sign In</a>
+                <a href="login.html" class="btn-primary">
+                    Get Started
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <button class="mobile-toggle" onclick="toggleMobileMenu()">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </nav>
 
+    <!-- Hero Section -->
     <section class="hero">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
-        <div class="shape shape-4"></div>
-
         <div class="hero-content">
-            <div class="badge">
-                <div class="badge-dot"></div>
-                <span>Hackathon 2026 Project</span>
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                98% Accuracy • ML-Powered
             </div>
 
-            <h1>
-                <span class="line1">Intelligent LLM</span><br>
-                <span class="line2">Routing Made Simple</span>
+            <h1 class="hero-title">
+                <span class="title-line">Intelligent LLM</span>
+                <span class="title-line gradient-text">Router & Optimizer</span>
             </h1>
 
             <p class="hero-subtitle">
-                AxiomAI uses machine learning to automatically route your prompts to the right model —
-                saving costs on simple queries while ensuring complex tasks get the power they need.
+                Cut your AI costs by up to 70% with smart prompt routing.
+                Our ML model analyzes complexity and routes to the optimal LLM tier automatically.
             </p>
 
             <div class="hero-cta">
-                <a href="login.html" class="btn btn-primary">Try Live Demo →</a>
-                <a href="https://huggingface.co/spaces/ritesh1918/axiom-router" target="_blank"
-                    class="btn btn-outline">HuggingFace Space</a>
+                <a href="login.html" class="btn-primary btn-large">
+                    Start Routing
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+                <a href="#demo" class="btn-outline btn-large">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polygon points="10,8 16,12 10,16" fill="currentColor" />
+                    </svg>
+                    Watch Demo
+                </a>
             </div>
 
-            <div class="stats">
+            <div class="hero-stats">
                 <div class="stat">
-                    <div class="stat-value">97.8%</div>
-                    <div class="stat-label">Accuracy</div>
+                    <span class="stat-value">70%</span>
+                    <span class="stat-label">Cost Savings</span>
                 </div>
+                <div class="stat-divider"></div>
                 <div class="stat">
-                    <div class="stat-value">~40%</div>
-                    <div class="stat-label">Cost Savings</div>
+                    <span class="stat-value">98%</span>
+                    <span class="stat-label">Accuracy</span>
                 </div>
+                <div class="stat-divider"></div>
                 <div class="stat">
-                    <div class="stat-value">&lt;50ms</div>
-                    <div class="stat-label">Latency</div>
+                    <span class="stat-value">&lt;100ms</span>
+                    <span class="stat-label">Latency</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D Illustration -->
+        <div class="hero-illustration">
+            <div class="floating-card card-1">
+                <div class="card-icon">🧠</div>
+                <div class="card-text">ML Classification</div>
+            </div>
+            <div class="floating-card card-2">
+                <div class="card-icon">⚡</div>
+                <div class="card-text">Fast Routing</div>
+            </div>
+            <div class="floating-card card-3">
+                <div class="card-icon">💰</div>
+                <div class="card-text">Cost Optimized</div>
+            </div>
+
+            <div class="illustration-main">
+                <div class="router-visual">
+                    <div class="input-node">
+                        <span>Prompt</span>
+                    </div>
+                    <div class="router-core">
+                        <div class="core-ring ring-1"></div>
+                        <div class="core-ring ring-2"></div>
+                        <div class="core-ring ring-3"></div>
+                        <div class="core-center">
+                            <span>AI</span>
+                        </div>
+                    </div>
+                    <div class="output-nodes">
+                        <div class="output-node small">
+                            <span>Small LLM</span>
+                            <div class="node-badge">$0.001</div>
+                        </div>
+                        <div class="output-node large">
+                            <span>Large LLM</span>
+                            <div class="node-badge">$0.03</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floating-cube cube-1"></div>
+            <div class="floating-cube cube-2"></div>
+            <div class="floating-cube cube-3"></div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-tag">FEATURES</span>
+                <h2 class="section-title">Smart Routing, <span class="gradient-text">Real Savings</span></h2>
+                <p class="section-subtitle">Our ML-powered router analyzes your prompts and automatically selects the
+                    most cost-effective LLM tier.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card featured">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2" />
+                            <path d="M16 24l6 6 10-12" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3>ML Classification</h3>
+                    <p>Fine-tuned DistilBERT model with 98% accuracy classifies prompt complexity in milliseconds.</p>
+                    <div class="feature-glow"></div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <path d="M24 4v40M4 24h40" stroke="currentColor" stroke-width="2" />
+                            <circle cx="24" cy="24" r="8" stroke="currentColor" stroke-width="2" />
+                            <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="1" opacity="0.5" />
+                        </svg>
+                    </div>
+                    <h3>Heuristic Engine</h3>
+                    <p>Rule-based pre-filtering catches obvious cases before ML, reducing latency and improving
+                        accuracy.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <rect x="8" y="8" width="32" height="32" rx="4" stroke="currentColor" stroke-width="2" />
+                            <path d="M16 28l6-8 6 4 6-10" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3>Analytics Dashboard</h3>
+                    <p>Real-time insights into routing decisions, cost savings, and usage patterns with beautiful
+                        charts.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <path d="M12 36V24l12-12 12 12v12" stroke="currentColor" stroke-width="2" />
+                            <rect x="20" y="28" width="8" height="8" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <h3>Chrome Extension</h3>
+                    <p>Route prompts directly from ChatGPT, Claude, or any AI interface with our browser extension.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="12" stroke="currentColor" stroke-width="2" />
+                            <path d="M24 16v8l6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3>Sub-100ms Latency</h3>
+                    <p>Lightning-fast routing decisions that don't slow down your AI workflows. Built for speed.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <rect x="8" y="16" width="32" height="20" rx="2" stroke="currentColor" stroke-width="2" />
+                            <circle cx="24" cy="26" r="6" stroke="currentColor" stroke-width="2" />
+                            <path d="M16 12h16" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <h3>Secure Auth</h3>
+                    <p>Supabase-powered authentication with email, Google, GitHub OAuth, and magic links.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="features" class="features">
-        <h2>Why AxiomAI?</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">💰</div>
-                <h3>Cost Optimization</h3>
-                <p>Route simple queries to cheaper models. Save 40%+ on your LLM API bills.</p>
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-tag">HOW IT WORKS</span>
+                <h2 class="section-title">Three Steps to <span class="gradient-text">Smarter AI</span></h2>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Lightning Fast</h3>
-                <p>ML-based classification in under 50ms. No perceptible delay.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <h3>High Accuracy</h3>
-                <p>DistilBERT classifier trained on 15K+ prompts achieves 97.8% accuracy.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🔌</div>
-                <h3>Easy Integration</h3>
-                <p>Drop-in REST API and Chrome extension. Works with any LLM provider.</p>
+
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">01</div>
+                    <div class="step-content">
+                        <h3>Send Your Prompt</h3>
+                        <p>Submit any prompt through our API, dashboard, or Chrome extension. Works with any LLM
+                            interface.</p>
+                    </div>
+                    <div class="step-visual">
+                        <div class="code-block">
+                            <code>POST /api/v1/route</code>
+                            <code>{ "prompt": "..." }</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-connector"></div>
+
+                <div class="step">
+                    <div class="step-number">02</div>
+                    <div class="step-content">
+                        <h3>ML Analysis</h3>
+                        <p>Our DistilBERT model analyzes complexity, keywords, and patterns to determine the optimal
+                            tier.</p>
+                    </div>
+                    <div class="step-visual">
+                        <div class="analysis-visual">
+                            <div class="analysis-bar" style="--width: 85%">Complexity</div>
+                            <div class="analysis-bar" style="--width: 92%">Confidence</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-connector"></div>
+
+                <div class="step">
+                    <div class="step-number">03</div>
+                    <div class="step-content">
+                        <h3>Optimal Routing</h3>
+                        <p>Simple queries go to fast, cheap models. Complex ones get the power they need. You save
+                            money.</p>
+                    </div>
+                    <div class="step-visual">
+                        <div class="routing-result">
+                            <span class="tier-badge small">Small LLM</span>
+                            <span class="savings">-70% cost</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- Tech Stack Section -->
+    <section class="tech-stack" id="technology">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-tag">TECHNOLOGY</span>
+                <h2 class="section-title">Built with <span class="gradient-text">Modern Stack</span></h2>
+            </div>
+
+            <div class="tech-cloud">
+                <div class="tech-item" style="--delay: 0s; --x: 10%; --y: 20%">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg"
+                        alt="Python">
+                    <span>Python</span>
+                </div>
+                <div class="tech-item" style="--delay: 0.2s; --x: 25%; --y: 60%">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg"
+                        alt="FastAPI">
+                    <span>FastAPI</span>
+                </div>
+                <div class="tech-item featured" style="--delay: 0.4s; --x: 45%; --y: 30%">
+                    <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="HuggingFace">
+                    <span>HuggingFace</span>
+                </div>
+                <div class="tech-item" style="--delay: 0.6s; --x: 65%; --y: 65%">
+                    <img src="https://www.vectorlogo.zone/logos/supabase/supabase-icon.svg" alt="Supabase">
+                    <span>Supabase</span>
+                </div>
+                <div class="tech-item" style="--delay: 0.8s; --x: 80%; --y: 25%">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg"
+                        alt="JavaScript">
+                    <span>JavaScript</span>
+                </div>
+                <div class="tech-item" style="--delay: 1s; --x: 15%; --y: 80%">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg"
+                        alt="PostgreSQL">
+                    <span>PostgreSQL</span>
+                </div>
+                <div class="tech-item" style="--delay: 1.2s; --x: 75%; --y: 80%">
+                    <img src="https://assets.vercel.com/image/upload/front/favicon/vercel/favicon.ico" alt="Vercel">
+                    <span>Vercel</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
     <section class="cta-section">
-        <h2>Ready to optimize your LLM costs?</h2>
-        <p>Try the live demo or install the Chrome extension.</p>
-        <a href="login.html" class="btn btn-primary">Launch Dashboard →</a>
+        <div class="section-container">
+            <div class="cta-card">
+                <div class="cta-glow"></div>
+                <h2>Ready to optimize your AI costs?</h2>
+                <p>Start routing smarter today. No credit card required.</p>
+                <div class="cta-buttons">
+                    <a href="login.html" class="btn-primary btn-large">
+                        Get Started Free
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    <a href="https://ritesh1918-axiom-backend.hf.space/docs" target="_blank"
+                        class="btn-outline btn-large">
+                        View API Docs
+                    </a>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <footer>
-        <p>Built with ❤️ for Hackathon 2026 | AxiomAI Team</p>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a href="index.html" class="nav-logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 40 40" fill="none">
+                            <path d="M20 5L35 15V25L20 35L5 25V15L20 5Z" stroke="currentColor" stroke-width="2"
+                                fill="none" />
+                            <circle cx="20" cy="20" r="4" fill="currentColor" />
+                        </svg>
+                    </div>
+                    <span class="logo-text">AxiomAI</span>
+                </a>
+                <p>Smart AI routing for cost-effective LLM usage.</p>
+            </div>
+
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#how-it-works">How it Works</a>
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="https://ritesh1918-axiom-backend.hf.space/docs" target="_blank">API Docs</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <a href="https://github.com/ritesh-1918/AxiomAI" target="_blank">GitHub</a>
+                    <a href="https://huggingface.co/spaces/ritesh1918/axiom-backend" target="_blank">HuggingFace</a>
+                    <a href="#">Documentation</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Connect</h4>
+                    <a href="https://github.com/ritesh-1918" target="_blank">GitHub</a>
+                    <a href="#">Twitter</a>
+                    <a href="login.html">Sign In</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 AxiomAI. Built with ❤️ for smarter AI.</p>
+        </div>
     </footer>
 
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How it Works</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="login.html" class="btn-primary">Get Started</a>
+        </div>
+    </div>
+
     <script>
-        // API Configuration - Uses HuggingFace Space
-        const HF_SPACE_URL = 'https://ritesh1918-axiom-router.hf.space';
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('active');
+            document.body.classList.toggle('menu-open');
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card, .step, .tech-item').forEach(el => {
+            observer.observe(el);
+        });
     </script>
 </body>
 
