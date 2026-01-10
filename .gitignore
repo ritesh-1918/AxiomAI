@@ -1,0 +1,43 @@
+# Virtual environments
+venv_backend/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Model files (too large for git)
+saved_model/
+*.safetensors
+
+# Upload scripts with tokens (NEVER COMMIT)
+upload_*.py
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/
+
+# Node
+node_modules/
+
+# ===================================
+# Backend (deployed on HuggingFace Spaces - NOT in GitHub)
+# ===================================
+backend/
+ml_training/
+hf_space/
+Dockerfile
+.dockerignore
+test_model.py
+requirements.txt
+.env
+.env.local
+

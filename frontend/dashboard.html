@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AxiomAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">🧠 AxiomAI</div>
+            <nav class="sidebar-nav">
+                <a href="#" class="active" data-tab="router">🚀 Router</a>
+                <a href="#" data-tab="eda">📊 EDA</a>
+                <a href="#" data-tab="metrics">📈 Metrics</a>
+                <a href="#" data-tab="model">🤖 Model Info</a>
+                <a href="#" data-tab="validation">✅ Validation</a>
+            </nav>
+            <div style="margin-top: auto; padding-top: 2rem;">
+                <a href="#" onclick="logout()" class="btn btn-outline"
+                    style="width: 100%; justify-content: center;">Logout</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <h1 id="pageTitle">
+                    <span class="live-indicator" title="System Online"></span>
+                    🚀 LLM Router
+                </h1>
+                <div class="user-info">
+                    <span id="userName">User</span>
+                    <div class="user-avatar" id="userAvatar">U</div>
+                </div>
+            </div>
+
+            <!-- Router Tab -->
+            <div id="tab-router" class="tab-content">
+                <div class="dashboard-grid">
+                    <div class="card router-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Test Prompt Routing</h3>
+                        </div>
+                        <textarea class="router-input" id="promptInput"
+                            placeholder="Enter a prompt to classify... e.g., 'Explain quantum entanglement in simple terms'"></textarea>
+                        <div class="char-counter" id="charCounter">0 / 4096</div>
+                        <button class="btn btn-primary" onclick="routePrompt()">🚀 Route Request</button>
+
+                        <div class="router-result" id="routerResult">
+                            <div class="result-tier" id="resultTier">-</div>
+                            <div
+                                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                                <div>
+                                    <div style="color: var(--text-muted); font-size: 0.85rem;">Confidence</div>
+                                    <div style="font-size: 1.5rem; font-weight: 700;" id="resultConfidence">-</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--text-muted); font-size: 0.85rem;">Latency</div>
+                                    <div style="font-size: 1.5rem; font-weight: 700;" id="resultLatency">-</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--text-muted); font-size: 0.85rem;">Reason</div>
+                                    <div style="font-size: 0.9rem;" id="resultReason">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Quick Stats</h3>
+                        </div>
+                        <div style="display: grid; gap: 1rem; margin-bottom: 2rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Requests Today</span>
+                                <span style="font-weight: 600;" id="requestsToday">0</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Small LLM Routes</span>
+                                <span style="font-weight: 600; color: var(--success);" id="smallRoutes">0</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Large LLM Routes</span>
+                                <span style="font-weight: 600; color: var(--accent);" id="largeRoutes">0</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Avg Latency</span>
+                                <span style="font-weight: 600;" id="avgLatency">0ms</span>
+                            </div>
+                        </div>
+
+                        <div class="card-header">
+                            <h3 class="card-title">Live System Logs</h3>
+                        </div>
+                        <div class="system-logs" id="systemLogs">
+                            <!-- Logs will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EDA Tab -->
+            <div id="tab-eda" class="tab-content" style="display: none;">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Label Distribution</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="labelDistChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Text Length Distribution</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="textLengthChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Complexity Indicators</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="complexityChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Dataset Statistics</h3>
+                        </div>
+                        <div style="display: grid; gap: 1rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Total Samples</span>
+                                <span style="font-weight: 600;">15,306</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Small LLM (0)</span>
+                                <span style="font-weight: 600; color: var(--success);">6,370</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Large LLM (1)</span>
+                                <span style="font-weight: 600; color: var(--accent);">8,936</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Avg Text Length</span>
+                                <span style="font-weight: 600;">78 chars</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Tab -->
+            <div id="tab-metrics" class="tab-content" style="display: none;">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Model Performance</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Training History</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="trainingChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Confusion Matrix</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem;">
+                            <div
+                                style="background: rgba(16, 185, 129, 0.2); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: 700;">6,250</div>
+                                <div style="color: var(--text-muted);">True Negative</div>
+                            </div>
+                            <div
+                                style="background: rgba(244, 63, 94, 0.2); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: 700;">120</div>
+                                <div style="color: var(--text-muted);">False Positive</div>
+                            </div>
+                            <div
+                                style="background: rgba(244, 63, 94, 0.2); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: 700;">189</div>
+                                <div style="color: var(--text-muted);">False Negative</div>
+                            </div>
+                            <div
+                                style="background: rgba(16, 185, 129, 0.2); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: 700;">8,747</div>
+                                <div style="color: var(--text-muted);">True Positive</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Key Metrics</h3>
+                        </div>
+                        <div style="display: grid; gap: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: var(--text-muted);">Accuracy</span>
+                                <span style="font-weight: 700; font-size: 1.25rem; color: var(--success);">97.8%</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: var(--text-muted);">F1 Score</span>
+                                <span style="font-weight: 700; font-size: 1.25rem; color: var(--success);">0.96</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: var(--text-muted);">Precision</span>
+                                <span style="font-weight: 700; font-size: 1.25rem;">0.97</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: var(--text-muted);">Recall</span>
+                                <span style="font-weight: 700; font-size: 1.25rem;">0.96</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Info Tab -->
+            <div id="tab-model" class="tab-content" style="display: none;">
+                <div class="dashboard-grid">
+                    <div class="card" style="grid-column: span 2;">
+                        <div class="card-header">
+                            <h3 class="card-title">Model Architecture</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; padding: 1rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🧠</div>
+                                <div style="font-weight: 600; font-size: 1.25rem;">DistilBERT</div>
+                                <div style="color: var(--text-muted);">Base Model</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎯</div>
+                                <div style="font-weight: 600; font-size: 1.25rem;">Binary Classification</div>
+                                <div style="color: var(--text-muted);">Task Type</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚡</div>
+                                <div style="font-weight: 600; font-size: 1.25rem;">66M</div>
+                                <div style="color: var(--text-muted);">Parameters</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Training Configuration</h3>
+                        </div>
+                        <div style="display: grid; gap: 0.75rem; font-family: monospace; font-size: 0.9rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">epochs</span>
+                                <span>2</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">batch_size</span>
+                                <span>8</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">max_length</span>
+                                <span>128</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">learning_rate</span>
+                                <span>5e-5</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">optimizer</span>
+                                <span>AdamW</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Why DistilBERT?</h3>
+                        </div>
+                        <ul style="color: var(--text-secondary); padding-left: 1.25rem;">
+                            <li>40% smaller than BERT</li>
+                            <li>60% faster inference</li>
+                            <li>97% of BERT's performance</li>
+                            <li>Perfect for real-time routing</li>
+                            <li>Low latency (&lt;50ms)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validation Tab -->
+            <div id="tab-validation" class="tab-content" style="display: none;">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Cross-Validation Results</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="cvChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Robustness Testing</h3>
+                        </div>
+                        <div style="display: grid; gap: 1rem;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Simple Queries</span>
+                                    <span style="color: var(--success);">98.2%</span>
+                                </div>
+                                <div style="height: 8px; background: var(--bg-dark); border-radius: 4px;">
+                                    <div
+                                        style="width: 98.2%; height: 100%; background: var(--success); border-radius: 4px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Complex Queries</span>
+                                    <span style="color: var(--success);">97.1%</span>
+                                </div>
+                                <div style="height: 8px; background: var(--bg-dark); border-radius: 4px;">
+                                    <div
+                                        style="width: 97.1%; height: 100%; background: var(--success); border-radius: 4px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Code Prompts</span>
+                                    <span style="color: var(--success);">96.5%</span>
+                                </div>
+                                <div style="height: 8px; background: var(--bg-dark); border-radius: 4px;">
+                                    <div
+                                        style="width: 96.5%; height: 100%; background: var(--success); border-radius: 4px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Edge Cases</span>
+                                    <span style="color: var(--warning);">94.3%</span>
+                                </div>
+                                <div style="height: 8px; background: var(--bg-dark); border-radius: 4px;">
+                                    <div
+                                        style="width: 94.3%; height: 100%; background: var(--warning); border-radius: 4px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" style="grid-column: span 2;">
+                        <div class="card-header">
+                            <h3 class="card-title">Generalization Analysis</h3>
+                        </div>
+                        <div
+                            style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center;">
+                            <div style="background: var(--bg-dark); padding: 1.5rem; border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">✓</div>
+                                <div style="color: var(--text-muted); margin-top: 0.5rem;">Unseen Patterns</div>
+                            </div>
+                            <div style="background: var(--bg-dark); padding: 1.5rem; border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">✓</div>
+                                <div style="color: var(--text-muted); margin-top: 0.5rem;">Different Domains</div>
+                            </div>
+                            <div style="background: var(--bg-dark); padding: 1.5rem; border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">✓</div>
+                                <div style="color: var(--text-muted); margin-top: 0.5rem;">Varying Lengths</div>
+                            </div>
+                            <div style="background: var(--bg-dark); padding: 1.5rem; border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">✓</div>
+                                <div style="color: var(--text-muted); margin-top: 0.5rem;">Multi-language</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/charts.js"></script>
+</body>
+
+</html>
