@@ -388,7 +388,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label for="password" style="margin-bottom: 0;">Password</label>
+                        <a href="forgot-password.html"
+                            style="font-size: 0.8rem; color: var(--accent-primary); text-decoration: none; transition: opacity 0.3s;">Forgot
+                            password?</a>
+                    </div>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
 
@@ -399,6 +405,15 @@
                     <button type="button" class="btn btn-outline" onclick="handleSignup()">
                         Sign Up
                     </button>
+                </div>
+
+                <div style="margin-top: 16px; text-align: center; display: flex; flex-direction: column; gap: 8px;">
+                    <a href="magic-link.html"
+                        style="font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; transition: color 0.3s;">✨
+                        Sign in with Magic Link</a>
+                    <a href="verify-otp.html"
+                        style="font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; transition: color 0.3s;">🔢
+                        Sign in with Code</a>
                 </div>
             </form>
 
