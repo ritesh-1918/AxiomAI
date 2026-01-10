@@ -2,7 +2,7 @@
 // CDN: https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
 
 const SUPABASE_URL = 'https://dtslwolgtskxqtutschk.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0c2x3b2xndHNreHF0dXRzY2hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNDU1MzEsImV4cCI6MjA4MzYyMTUzMX0.Zy5y6Czo8p9b7BqgpYRbCwJRJ6ILwaVL5LlDnVLvW2U';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0c2x3b2xndHNreHF0dXRzY2hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNDU1MzEsImV4cCI6MjA4MzYyMTUzMX0.XJQQB6SChGvK4tNpFO3WKFfADL0h41dTt8pprM8zgZw';
 
 // Initialize Supabase client
 let supabaseClient = null;
