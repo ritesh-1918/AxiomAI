@@ -1,5 +1,5 @@
 // AxiomAI Content Script - Button-triggered analysis
-const GRADIO_API = 'https://ritesh1918-axiom-router.hf.space/gradio_api/call/classify_prompt';
+const API_URL = 'https://ritesh1918-axiom-backend.hf.space';
 
 function createWidget() {
     const existing = document.getElementById('axiom-widget');
@@ -131,48 +131,31 @@ async function analyzePrompt(text) {
     resultEl.style.display = 'none';
 
     try {
-        // Step 1: POST to get event_id
-        const postResponse = await fetch(GRADIO_API, {
+        const response = await fetch(`${API_URL}/v1/route`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: [text] })
+            body: JSON.stringify({ prompt: text })
         });
 
-        if (!postResponse.ok) throw new Error(`API error: ${postResponse.status}`);
+        if (!response.ok) throw new Error(`API error: ${response.status}`);
+        const data = await response.json();
 
-        const { event_id } = await postResponse.json();
-
-        // Step 2: GET result
-        const getResponse = await fetch(`${GRADIO_API}/${event_id}`);
-        const resultText = await getResponse.text();
-
-        // Parse SSE response
-        const lines = resultText.split('\n');
-        let dataLine = null;
-        for (const line of lines) {
-            if (line.startsWith('data:')) {
-                dataLine = line;
-            }
-        }
-
-        if (dataLine) {
-            const data = JSON.parse(dataLine.replace('data: ', '').trim());
-            if (Array.isArray(data) && data[0]) {
-                updateUI(data[0]);
-                return;
-            }
-        }
-        throw new Error('Invalid response');
+        updateUI({
+            'Recommended Tier': data.selected_tier === 'large_llm' ? '🔥 LARGE LLM' : '⚡ SMALL LLM',
+            'Confidence': (data.confidence * 100).toFixed(1) + '%',
+            'Method': 'ML Model',
+            'Explanation': data.routing_reason
+        });
 
     } catch (error) {
         console.error('AxiomAI:', error);
         // Fallback
-        const isLarge = text.length > 150 || /code|algorithm|implement|analyze|explain.*detail/i.test(text);
+        const isLarge = text.length > 150;
         updateUI({
             'Recommended Tier': isLarge ? '🔥 LARGE LLM' : '⚡ SMALL LLM',
-            'Confidence': '85%',
-            'Method': 'Offline',
-            'Explanation': isLarge ? 'Complex task detected' : 'Simple task detected'
+            'Confidence': 'Note: Offline Mode',
+            'Method': 'Local Rule',
+            'Explanation': 'Backend unreachable'
         });
     } finally {
         btn.disabled = false;
@@ -180,6 +163,7 @@ async function analyzePrompt(text) {
         statusEl.style.display = 'none';
     }
 }
+
 
 function updateUI(result) {
     const resultEl = document.getElementById('axiom-result');
